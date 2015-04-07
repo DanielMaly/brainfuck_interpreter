@@ -10,12 +10,17 @@ class Binterpreter:
         self.output = output_source
         self.instruction_log = []
         self.instruction_log_pointer = 0
+        self.step_count = 0
 
     def initialize_memory(self, memory):
         self.memory = memory
 
     def initialize_pointer(self, position):
         self.pointer = position
+
+    def start(self):
+        while not self.terminated:
+            self.step()
 
     def terminate(self):
         self.terminated = True
@@ -31,8 +36,8 @@ class Binterpreter:
         return ret
 
     def move_previous_instruction(self):
-        ret = self.instruction_log_pointer[self.instruction_log_pointer - 1]
-        self.instruction_log_pointer += 1
+        ret = self.instruction_log[self.instruction_log_pointer - 1]
+        self.instruction_log_pointer -= 1
         return ret
 
     def step(self):
@@ -40,16 +45,25 @@ class Binterpreter:
         if instruction is None:
             self.terminate()
 
+        if self.step_count > 20000:
+            print("Binterpreter terminating because maximum number of steps was reached")
+            self.terminate()
+
+        self.step_count += 1
+
+        print("S " + str(self.step_count) + " ## I " + str(self.instruction_log_pointer) + " ## MP " + str(self.pointer) + " ## MV " +
+              str(self.memory[self.pointer]) + " ## X " + str(instruction))
+
         options = {
-            '#' : self.print_debug_info,
-            '<' : self.move_left,
-            '>' : self.move_right,
-            '.' : self.out,
-            ',' : self.read,
-            '+' : self.increment,
-            '-' : self.decrement,
-            '[' : self.open_loop,
-            ']' : self.close_loop
+            '#': self.print_debug_info,
+            '<': self.move_left,
+            '>': self.move_right,
+            '.': self.out,
+            ',': self.read,
+            '+': self.increment,
+            '-': self.decrement,
+            '[': self.open_loop,
+            ']': self.close_loop
         }
 
         if instruction in options:
@@ -62,18 +76,20 @@ class Binterpreter:
 
     def move_right(self):
         self.pointer += 1
+        if self.pointer >= len(self.memory):
+            self.memory.append(0x00)
 
     def increment(self):
         if self.memory[self.pointer] == 0xFF:
             self.memory[self.pointer] = 0x00
         else:
-            self.memory[self.pointer] += 1;
+            self.memory[self.pointer] += 1
 
     def decrement(self):
         if self.memory[self.pointer] == 0x00:
             self.memory[self.pointer] = 0xFF
         else:
-            self.memory[self.pointer] -= 1;
+            self.memory[self.pointer] -= 1
 
     def out(self):
         self.output.put_char(self.memory[self.pointer])
@@ -84,19 +100,22 @@ class Binterpreter:
 
     def open_loop(self):
         if self.memory[self.pointer] == 0x00:
-            while self.move_next_instruction() != ']':
-                pass
+            closed_loops_count = 1
+            while closed_loops_count > 0:
+                instr = self.move_next_instruction()
+                if instr == ']':
+                    closed_loops_count -= 1
+                elif instr == '[':
+                    closed_loops_count += 1
 
     def close_loop(self):
         if self.memory[self.pointer] != 0x00:
-            while self.move_previous_instruction() != '[':
-                pass
+            opened_loops_count = 1
+            self.move_previous_instruction()
+            while opened_loops_count > 0:
+                instr = self.move_previous_instruction()
+                if instr == '[':
+                    opened_loops_count -= 1
+                elif instr == ']':
+                    opened_loops_count += 1
             self.move_next_instruction()
-
-
-
-
-
-
-
-

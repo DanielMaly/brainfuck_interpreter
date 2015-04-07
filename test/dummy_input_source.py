@@ -1,5 +1,6 @@
 __author__ = 'Daniel Maly'
 
+
 class DummyInputSource():
 
     def __init__(self, program, inp):
