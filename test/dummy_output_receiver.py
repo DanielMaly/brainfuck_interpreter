@@ -1,13 +1,11 @@
 __author__ = 'Daniel Maly'
 
+import brainx.output_receiver as OR
 
-class DummyOutputReceiver:
+class DummyOutputReceiver(OR.OutputReceiver):
     def __init__(self):
-        self.output = []
-        self.debug_info = None
+        super().__init__()
+        self.print_to_stdout = False
 
-    def put_char(self, char):
-        self.output.append(char)
 
-    def print_debug_info(self, debug_info):
-        self.debug_info = debug_info
+

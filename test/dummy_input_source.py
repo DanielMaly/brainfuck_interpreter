@@ -22,3 +22,6 @@ class DummyInputSource():
         ret = self.input[self.input_pointer]
         self.input_pointer += 1
         return ret
+
+    def get_debug_data(self):
+        return "# program data\n" + self.program.replace("#","") + "\n\n"

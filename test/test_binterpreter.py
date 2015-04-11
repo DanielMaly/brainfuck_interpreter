@@ -11,7 +11,7 @@ class TestBinterpreter(unittest.TestCase):
     def test_hello_world(self):
         print("Starting hello world test")
         program = "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<" \
-                  ".+++.------.--------.>>+.>++."
+                  ".+++.------.--------.>>+.>++.#"
         input_source = DummyInputSource(program, [])
         output_receiver = DummyOutputReceiver()
         binterpreter = Binterpreter(input_source, output_receiver)

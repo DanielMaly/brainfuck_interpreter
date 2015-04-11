@@ -11,6 +11,7 @@ class Binterpreter:
         self.instruction_log = []
         self.instruction_log_pointer = 0
         self.step_count = 0
+        self.print_steps = False
 
     def initialize_memory(self, memory):
         self.memory = memory
@@ -26,7 +27,8 @@ class Binterpreter:
         self.terminated = True
 
     def print_debug_info(self):
-        pass
+        input_debug_data = self.inp.get_debug_data()
+        self.output.print_debug_data(input_debug_data, self)
 
     def move_next_instruction(self):
         if self.instruction_log_pointer >= len(self.instruction_log):
@@ -51,7 +53,8 @@ class Binterpreter:
 
         self.step_count += 1
 
-        print("S " + str(self.step_count) + " ## I " + str(self.instruction_log_pointer) + " ## MP " + str(self.pointer) + " ## MV " +
+        if self.print_steps:
+            print("S " + str(self.step_count) + " ## I " + str(self.instruction_log_pointer) + " ## MP " + str(self.pointer) + " ## MV " +
               str(self.memory[self.pointer]) + " ## X " + str(instruction))
 
         options = {
