@@ -8,6 +8,7 @@ class OutputReceiver:
         self.output = []
         self.debug_info = None
         self.print_to_stdout = True
+        self.print_debug_to_stdout = False
 
     def put_char(self, char):
         self.output.append(char)
@@ -36,7 +37,7 @@ class OutputReceiver:
         filename = "debug_" + number + ".log"
         debug_data = self.get_debug_data(input_debug_data, binterpreter)
 
-        if self.print_to_stdout:
+        if self.print_debug_to_stdout:
             print(debug_data)
 
         with open(filename, 'w') as file:

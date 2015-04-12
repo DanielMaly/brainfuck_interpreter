@@ -2,12 +2,12 @@ __author__ = 'Daniel Maly'
 
 
 class Binterpreter:
-    def __init__(self, input_source, output_source):
+    def __init__(self, input_source, output_receiver):
         self.memory = bytearray.fromhex('00')
         self.pointer = 0
         self.terminated = False
         self.inp = input_source
-        self.output = output_source
+        self.output = output_receiver
         self.instruction_log = []
         self.instruction_log_pointer = 0
         self.step_count = 0
