@@ -13,7 +13,7 @@ class OutputReceiver:
     def put_char(self, char):
         self.output.append(char)
         if self.print_to_stdout:
-            sys.stdout.write(char)
+            sys.stdout.write(chr(char))
 
     def output_bytes(self):
         return bytes(self.output)
@@ -28,7 +28,7 @@ class OutputReceiver:
 
     def get_suitable_file_number(self):
         numbers = set([int(f[6:8]) for f in glob.glob("debug_[0-9][0-9].log")])
-        available = set(range(100)) - numbers
+        available = set(range(1,100)) - numbers
         return sorted(list(available))[0]
 
 

@@ -14,7 +14,7 @@ class Binterpreter:
         self.print_steps = False
 
     def initialize_memory(self, memory):
-        self.memory = memory
+        self.memory = bytearray(memory)
 
     def initialize_pointer(self, position):
         self.pointer = position
@@ -47,7 +47,7 @@ class Binterpreter:
         if instruction is None:
             self.terminate()
 
-        if self.step_count > 20000:
+        if self.step_count > 200000:
             print("Binterpreter terminating because maximum number of steps was reached")
             self.terminate()
 

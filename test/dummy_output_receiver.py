@@ -1,6 +1,6 @@
 __author__ = 'Daniel Maly'
 
-import brainx.output_receiver as OR
+import output_receiver as OR
 
 class DummyOutputReceiver(OR.OutputReceiver):
     def __init__(self):

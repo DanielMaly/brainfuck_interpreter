@@ -3,8 +3,8 @@ __author__ = 'Daniel Maly'
 import unittest
 from test.dummy_input_source import DummyInputSource
 from test.dummy_output_receiver import DummyOutputReceiver
-from brainx.binterpreter import Binterpreter
-from brainx.util import *
+from binterpreter import Binterpreter
+from util import *
 
 
 class TestBinterpreter(unittest.TestCase):

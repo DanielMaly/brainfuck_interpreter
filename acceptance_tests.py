@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 """
@@ -53,7 +53,7 @@ import subprocess
 # test 0a
 print('\n\nTest 0a: brainx "[-]" -m b\'\\x03\\x02\' -p 1 -t')
 print('\tvynulování aktuální, ale pouze aktuální, buňky')
-args = ['py', 'brainx', '"[-]"', '-m', r"b'\x03\x02'", '-p', '1', '-t']
+args = ['python', 'brainx', '"[-]"', '-m', r"b'\x03\x02'", '-p', '1', '-t']
 p = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 output, error = p.communicate()
 print( "output:", output )
@@ -71,7 +71,7 @@ assert txt_in == txt_out
 # test 0b
 print('\n\nTest 0b: brainx "[[-]<]" -m b\'\\x03\\x03\\x00\\x02\\x02\' -p 4 -t')
 print('\tvynulování všech nenulových buněk doleva')
-args = ['python3', 'brainx', '"[[-]<]"', '-m', r"b'\x03\x03\x00\x02\x02'", '-p', '4', '-t']
+args = ['python', 'brainx', '"[[-]<]"', '-m', r"b'\x03\x03\x00\x02\x02'", '-p', '4', '-t']
 p = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 output, error = p.communicate()
 print( "output:", output )
@@ -82,14 +82,14 @@ assert p.returncode == 0
 assert error == b''
 with open('tests/memory02_debug_01.log', mode='r', encoding='ascii') as f:
     txt_in = f.read()
-with open('debug_01.log', mode='r', encoding='ascii') as f:
+with open('debug_02.log', mode='r', encoding='ascii') as f:
     txt_out = f.read()
 assert txt_in == txt_out
 
 # test 0c
 print('\n\nTest 0c: brainx "[<]" -m b\'\\x03\\x03\\x00\\x02\\x02\' -p 4 -t')
 print('\tpřesun na první nenulovou buňku doleva')
-args = ['python3', 'brainx', '"[<]"', '-m', r"b'\x03\x03\x00\x02\x02'", '-p', '4', '-t']
+args = ['python', 'brainx', '"[<]"', '-m', r"b'\x03\x03\x00\x02\x02'", '-p', '4', '-t']
 p = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 output, error = p.communicate()
 print( "output:", output )
@@ -100,14 +100,14 @@ assert p.returncode == 0
 assert error == b''
 with open('tests/memory03_debug_01.log', mode='r', encoding='ascii') as f:
     txt_in = f.read()
-with open('debug_01.log', mode='r', encoding='ascii') as f:
+with open('debug_03.log', mode='r', encoding='ascii') as f:
     txt_out = f.read()
 assert txt_in == txt_out
 
 # test 0d
 print('\n\nTest 0d: brainx "[>]" -m b\'\\x03\\x03\\x00\\x02\\x02\' -t')
 print('\tpřesun na první nenulovou buňku doprava')
-args = ['python3', 'brainx', '"[>]"', '-m', r"b'\x03\x03\x00\x02\x02'", '-t']
+args = ['python', 'brainx', '"[>]"', '-m', r"b'\x03\x03\x00\x02\x02'", '-t']
 p = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 output, error = p.communicate()
 print( "output:", output )
@@ -118,14 +118,14 @@ assert p.returncode == 0
 assert error == b''
 with open('tests/memory04_debug_01.log', mode='r', encoding='ascii') as f:
     txt_in = f.read()
-with open('debug_01.log', mode='r', encoding='ascii') as f:
+with open('debug_04.log', mode='r', encoding='ascii') as f:
     txt_out = f.read()
 assert txt_in == txt_out
 
 # test 0e
 print('\n\nTest 0e: brainx "[>+<-]" -m b\'\\x03\\x03\' -t')
 print('\tdestruktivní přičtení aktuální buňky k buňce následující')
-args = ['python3', 'brainx', '"[>+<-]"', '-m', r"b'\x03\x03'", '-t']
+args = ['python', 'brainx', '"[>+<-]"', '-m', r"b'\x03\x03'", '-t']
 p = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 output, error = p.communicate()
 print( "output:", output )
@@ -136,14 +136,14 @@ assert p.returncode == 0
 assert error == b''
 with open('tests/memory05_debug_01.log', mode='r', encoding='ascii') as f:
     txt_in = f.read()
-with open('debug_01.log', mode='r', encoding='ascii') as f:
+with open('debug_05.log', mode='r', encoding='ascii') as f:
     txt_out = f.read()
 assert txt_in == txt_out
 
 # test 0f
 print('\n\nTest 0f: brainx "[>+>+<<-]>>[<<+>>-]" -m b\'\\x03\\x03\' -t')
 print('\tnedestruktivní přičtení aktuální buňky k buňce následující')
-args = ['python3', 'brainx', '"[>+>+<<-]>>[<<+>>-]"', '-m', r"b'\x03\x03'", '-t']
+args = ['python', 'brainx', '"[>+>+<<-]>>[<<+>>-]"', '-m', r"b'\x03\x03'", '-t']
 p = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 output, error = p.communicate()
 print( "output:", output )
@@ -154,14 +154,14 @@ assert p.returncode == 0
 assert error == b''
 with open('tests/memory06_debug_01.log', mode='r', encoding='ascii') as f:
     txt_in = f.read()
-with open('debug_01.log', mode='r', encoding='ascii') as f:
+with open('debug_06.log', mode='r', encoding='ascii') as f:
     txt_out = f.read()
 assert txt_in == txt_out
 
 # test 0g
 print('\n\nTest 0g: brainx "[>-<-]" -m b\'\\x03\\x05\' -t')
 print('\tdestruktivní odečtení aktuální buňky od buňky následující')
-args = ['python3', 'brainx', '"[>-<-]"', '-m', r"b'\x03\x05'", '-t']
+args = ['python', 'brainx', '"[>-<-]"', '-m', r"b'\x03\x05'", '-t']
 p = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 output, error = p.communicate()
 print( "output:", output )
@@ -172,7 +172,7 @@ assert p.returncode == 0
 assert error == b''
 with open('tests/memory07_debug_01.log', mode='r', encoding='ascii') as f:
     txt_in = f.read()
-with open('debug_01.log', mode='r', encoding='ascii') as f:
+with open('debug_07.log', mode='r', encoding='ascii') as f:
     txt_out = f.read()
 assert txt_in == txt_out
 
@@ -184,7 +184,7 @@ assert txt_in == txt_out
 # test 1
 print('\n\nTest 1: brainx tests/hello1.b')
 print('\tHelloWorld s \\n')
-args = ['python3', 'brainx', 'tests/hello1.b']
+args = ['python', 'brainx', 'tests/hello1.b']
 p = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 output, error = p.communicate()
 print( "output:", output )
@@ -197,7 +197,7 @@ assert error == b''
 # test 2a
 print('\n\nTest 2a: brainx tests/hello2.b')
 print('\tHelloWorld bez \\n')
-args = ['python3', 'brainx', 'tests/hello2.b']
+args = ['python', 'brainx', 'tests/hello2.b']
 p = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 output, error = p.communicate()
 print( "output:", output )
@@ -210,7 +210,7 @@ assert error == b''
 # test 2b
 print('\n\nTest 2b: brainx -t tests/hello2.b')
 print('\tHelloWorld bez \\n plus log')
-args = ['python3', 'brainx', '-t', 'tests/hello2.b']
+args = ['python', 'brainx', '-t', 'tests/hello2.b']
 p = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 output, error = p.communicate()
 print( "output:", output )
@@ -221,14 +221,14 @@ assert p.returncode == 0
 assert error == b''
 with open('tests/hello2_debug_01.log', mode='r', encoding='ascii') as f:
     txt_in = f.read()
-with open('debug_01.log', mode='r', encoding='ascii') as f:
+with open('debug_08.log', mode='r', encoding='ascii') as f:
     txt_out = f.read()
 assert txt_in == txt_out
 
 # test 2c
 print('\n\nTest 2c: brainx tests/hello2t.b')
 print('\tHelloWorld bez \\n plus dva průběžné logy')
-args = ['python3', 'brainx', 'tests/hello2t.b']
+args = ['python', 'brainx', 'tests/hello2t.b']
 p = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 output, error = p.communicate()
 print( "output:", output )
@@ -239,12 +239,12 @@ assert p.returncode == 0
 assert error == b''
 with open('tests/hello2t_debug_01.log', mode='r', encoding='ascii') as f:
     txt_in = f.read()
-with open('debug_01.log', mode='r', encoding='ascii') as f:
+with open('debug_09.log', mode='r', encoding='ascii') as f:
     txt_out = f.read()
 assert txt_in == txt_out
 with open('tests/hello2t_debug_02.log', mode='r', encoding='ascii') as f:
     txt_in = f.read()
-with open('debug_02.log', mode='r', encoding='ascii') as f:
+with open('debug_10.log', mode='r', encoding='ascii') as f:
     txt_out = f.read()
 assert txt_in == txt_out
 
@@ -256,7 +256,7 @@ assert txt_in == txt_out
 # test 3
 print('\n\nTest 3: brainx tests/numwarp_input.b')
 print('\tnumwarp.b pro vstup "123"')
-args = ['python3', 'brainx', 'tests/numwarp_input.b']
+args = ['python', 'brainx', 'tests/numwarp_input.b']
 p = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 output, error = p.communicate()
 print( "output:", output )
@@ -274,7 +274,7 @@ assert error == b''
 # test 4a
 print('\n\nTest 4a: brainx tests/sachovnice.jpg')
 print('\tumíme jen PNG')
-args = ['python3', 'brainx', 'tests/sachovnice.jpg']
+args = ['python', 'brainx', 'tests/sachovnice.jpg']
 p = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 output, error = p.communicate()
 print( "output:", output )
@@ -287,7 +287,7 @@ assert b'PNGWrongHeaderError' in error
 # test 4b
 print('\n\nTest 4b: brainx tests/sachovnice_paleta.png')
 print('\tumíme jen některá PNG')
-args = ['python3', 'brainx', 'tests/sachovnice_paleta.png']
+args = ['python', 'brainx', 'tests/sachovnice_paleta.png']
 p = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 output, error = p.communicate()
 print( "output:", output )
@@ -305,7 +305,7 @@ assert b'PNGNotImplementedError' in error
 # test 5a
 print('\n\nTest 5a: brainx tests/HelloWorld.png')
 print('\tnačtení dat z obrázku HelloWorld.png')
-args = ['python3', 'brainx', 'tests/HelloWorld.png']
+args = ['python', 'brainx', 'tests/HelloWorld.png']
 p = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 output, error = p.communicate()
 print( "output:", output )
@@ -318,7 +318,7 @@ assert error == b''
 # test 5b
 print('\n\nTest 5b: brainx -t tests/HelloWorld.png')
 print('\tnačtení dat z obrázku HelloWorld.png plus log')
-args = ['python3', 'brainx', '-t', 'tests/HelloWorld.png']
+args = ['python', 'brainx', '-t', 'tests/HelloWorld.png']
 p = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 output, error = p.communicate()
 print( "output:", output )
