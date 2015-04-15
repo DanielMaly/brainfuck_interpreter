@@ -62,6 +62,10 @@ class PNGDecoder:
             raise CRCError()
 
         uncompressed = zlib.decompress(data)
+        compressed = zlib.compress(uncompressed)
+        if compressed != data:
+            print("WHAT?!")
+
         step = 3*width + 1
         for i in range(0, len(uncompressed), step):
             row = uncompressed[i:(i + step)]
