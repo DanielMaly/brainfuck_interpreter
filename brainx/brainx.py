@@ -1,11 +1,15 @@
+import traceback
+
 __author__ = 'Daniel Maly'
 
 import argparse
 import sys
 import struct
+import re
 from binterpreter import Binterpreter
-from input_source import TextInputSource
+from input_source import InputSource
 from output_receiver import OutputReceiver
+from png_decoder import PNGNotImplementedError, PNGWrongHeaderError, CRCError
 
 def main():
     parser = argparse.ArgumentParser()
@@ -22,10 +26,19 @@ def main():
 
 
 def dispatch(args):
-    source = retrieve_source(args.source, debug=args.test)
-    output = OutputReceiver()
-    start_interpreter(source, output, args.memory, args.pointer, args.steps)
-
+    try:
+        source = retrieve_source(args.source, debug=args.test)
+        output = OutputReceiver()
+        start_interpreter(source, output, args.memory, args.pointer, args.steps)
+    except PNGWrongHeaderError as ex:
+        traceback.print_exc()
+        sys.exit(4)
+    except PNGNotImplementedError as ex:
+        traceback.print_exc()
+        sys.exit(8)
+    except Exception as ex:
+        traceback.print_exc()
+        sys.exit(16)
 
 def start_interpreter(source, output, memory, pointer, steps):
     binterpreter = Binterpreter(input_source=source, output_receiver=output)
@@ -39,6 +52,7 @@ def start_interpreter(source, output, memory, pointer, steps):
     binterpreter.start()
 
 
+
 def memory_bytes_from_string(st):
     #Unwrap b'...'
     s = bytes(st[2:-1], "ascii").decode("unicode_escape")
@@ -47,12 +61,14 @@ def memory_bytes_from_string(st):
 def retrieve_source(source, debug=False):
     if source is not None:
         if source[0] == '"' and source[-1] == '"':
-            return TextInputSource.for_input_string(source[1:-1], debug=debug)
+            return InputSource.for_input_string(source[1:-1], debug=debug)
+        elif len(source) > 4 and re.match(r"^[^.]*\.[a-zA-Z]{3}$", source) is not None:
+            return InputSource.for_image_file(source, debug)
         else:
-            return TextInputSource.for_file(source, debug=debug)
+            return InputSource.for_file(source, debug=debug)
     else:
         #Interpreter mode
-        return TextInputSource.for_interactive_string(debug=debug)
+        return InputSource.for_interactive_string(debug=debug)
 
 if __name__ == "__main__":
     main()

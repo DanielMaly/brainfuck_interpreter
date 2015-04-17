@@ -23,7 +23,7 @@ class OutputReceiver:
         memory_pointer = "# memory pointer\n" + str(binterpreter.pointer) + "\n\n"
         output = "# output\n" + str(self.output_bytes()) + "\n\n"
 
-        debug_info = input_debug_data + memory + memory_pointer + output
+        debug_info = input_debug_data[0] + memory + memory_pointer + output + input_debug_data[1]
         return debug_info
 
     def get_suitable_file_number(self):

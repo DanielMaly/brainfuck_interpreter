@@ -2,8 +2,10 @@ __author__ = 'Daniel Maly'
 
 import re
 import sys
+import png_decoder
 
-class TextInputSource:
+
+class InputSource:
 
     @classmethod
     def for_file(cls, filename, debug=False):
@@ -11,6 +13,12 @@ class TextInputSource:
         with open(filename, 'r') as file:
             inp = file.read()
         return cls.for_input_string(inp, debug)
+
+    @classmethod
+    def for_image_file(cls, filename, debug=False):
+        decoder = png_decoder.PNGDecoder(filename)
+        decoder.decode()
+        return BrainlollerInputSource(decoder, debug)
 
     @classmethod
     def for_input_string(cls, string, debug=False):
@@ -51,4 +59,46 @@ class TextInputSource:
         return ord(ret)
 
     def get_debug_data(self):
-        return "# program data\n" + self.program + "\n\n"
+        return "# program data\n" + self.program + "\n\n", ""
+
+
+class BrainlollerInputSource(InputSource):
+    def __init__(self, decoder, debug=False):
+        color_map = {
+            b'\xff\x00\x00': '>',
+            b'\x80\x00\x00': '<',
+            b'\x00\xff\x00': '+',
+            b'\x00\x80\x00': '-',
+            b'\x00\x00\xff': '.',
+            b'\x00\x00\x80': ',',
+            b'\xff\xff\x00': '[',
+            b'\x80\x80\x00': ']',
+            }
+
+        ROTATE_LEFT = b'\x00\x80\x80'
+        ROTATE_RIGHT = b'\x00\xff\xff'
+
+        pointer_ops = {
+            0: (lambda x, y: (x+1, y)),  # Right
+            1: (lambda x, y: (x, y+1)),  # Down
+            2: (lambda x, y: (x-1, y)),  # Left
+            3: (lambda x, y: (x, y-1))   # Up
+        }
+
+        program = ""
+        pointer_dir = 0
+        pointer = (0, 0)
+        while pointer[0] in range(decoder.width) and pointer[1] in range(decoder.height):
+            op = None
+            pix = decoder.pixels[pointer[1]][pointer[0]]
+            if pix in color_map:
+                program += color_map[pix]
+                # print("Read pix {} translated to {}".format(pix, color_map[pix]))
+            elif pix == ROTATE_LEFT:
+                pointer_dir -= 1
+            elif pix == ROTATE_RIGHT:
+                pointer_dir += 1
+            pointer_dir %= 4
+            pointer = (pointer_ops[pointer_dir])(pointer[0], pointer[1])
+
+        super().__init__(program, [], debug)

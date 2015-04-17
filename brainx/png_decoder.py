@@ -27,12 +27,18 @@ class PNGDecoder:
     def __init__(self, filename):
         self.filename = filename
         self.pixels = []
+        self.chunks = bytearray()
+        self.width = 0
+        self.height = 0
 
     def decode(self):
         with open(self.filename, 'rb') as file:
             width, height = self.read_png_header(file)
+            self.width = width
+            self.height = height
             while self.read_chunk(file, width) != self.LAST_CHUNK:
                 pass
+            self.process_chunks()
 
     def read_png_header(self, file):
         #Read PNG header
@@ -66,14 +72,12 @@ class PNGDecoder:
 
         uncompressed = zlib.decompress(data)
 
-        unfiltered = self.unfilter(uncompressed, width)
-        for i in range(len(unfiltered)):
-            row = unfiltered[i]
-
-            for pix in row:
-                self.pixels.append(pix)
+        self.chunks.extend(uncompressed)
 
         return self.MORE_CHUNKS
+
+    def process_chunks(self):
+        self.pixels = self.unfilter(self.chunks, self.width)
 
     def unfilter(self, data, width):
         filter_funcs = {
