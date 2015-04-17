@@ -21,6 +21,9 @@ class PNGDecoder:
     IEND = b'\x00\x00\x00\x00IEND'
     SPECIAL_FIELDS = bytes.fromhex("08 02 00 00 00")
 
+    LAST_CHUNK = 0
+    MORE_CHUNKS = 1
+
     def __init__(self, filename):
         self.filename = filename
         self.pixels = []
@@ -28,8 +31,8 @@ class PNGDecoder:
     def decode(self):
         with open(self.filename, 'rb') as file:
             width, height = self.read_png_header(file)
-            while self.read_chunk(file, width)[0] != self.IEND:
-                self.read_chunk()
+            while self.read_chunk(file, width) != self.LAST_CHUNK:
+                pass
 
     def read_png_header(self, file):
         #Read PNG header
@@ -52,7 +55,7 @@ class PNGDecoder:
     def read_chunk(self, file, width):
         h = file.read(8)
         if h == self.IEND:
-            return self.IEND, None
+            return self.LAST_CHUNK
 
         data_length = struct.unpack(">I", h[:4])[0]
         d = file.read(data_length + 4)
@@ -62,22 +65,78 @@ class PNGDecoder:
             raise CRCError()
 
         uncompressed = zlib.decompress(data)
-        compressed = zlib.compress(uncompressed)
-        if compressed != data:
-            print("WHAT?!")
 
+        unfiltered = self.unfilter(uncompressed, width)
+        for i in range(len(unfiltered)):
+            row = unfiltered[i]
+
+            for pix in row:
+                self.pixels.append(pix)
+
+        return self.MORE_CHUNKS
+
+    def unfilter(self, data, width):
+        filter_funcs = {
+            0: (lambda x, a, b, c: x),
+            1: (lambda x, a, b, c: x + a),
+            2: (lambda x, a, b, c: x + b),
+            3: (lambda x, a, b, c: (a + b) // 2),
+            4: (lambda x, a, b, c: x + paeth(a, b, c))
+        }
+
+        unfilt = []
         step = 3*width + 1
-        for i in range(0, len(uncompressed), step):
-            row = uncompressed[i:(i + step)]
+        prev_row_index = -1
+        for i in range(0, len(data), step):
+            previous_row = None
+            if prev_row_index >= 0:
+                previous_row = unfilt[prev_row_index]
+
+            row = data[i:(i+step)]
             filter = row[0]
-            if filter != 0x00:
-                raise PNGNotImplementedError()
-            for j in range(1, width, 3):
-                pixel = row[j:(j+3)]
-                red, green, blue = struct.unpack("BBB", pixel)
-                self.pixels.append((red, green, blue))
+
+            apix = bytes.fromhex("00 00 00")
+            bpix = bytes.fromhex("00 00 00")
+            cpix = bytes.fromhex("00 00 00")
+
+            recon_row = []
+            for j in range(1, len(row), 3):
+                pix = row[j:(j+3)]
+                if previous_row is not None:
+                    bpix = previous_row[j // 3]
+
+                if len(recon_row) > 0:
+                    apix = recon_row[(j // 3) - 1]
+                    if previous_row is not None:
+                        cpix = previous_row[(j // 3) - 1]
+
+                xpix = struct.unpack("BBB", pix)
+                npix = bytearray()
+
+                for k in range(3):
+                    unfilt_pix = (filter_funcs[filter])(xpix[k], apix[k], bpix[k], cpix[k]) % 256
+                    npix.append(unfilt_pix)
+                recon_row.append(bytes(npix))
+
+            prev_row_index += 1
+            unfilt.append(recon_row)
+
+        return unfilt
 
     def crc_chunk(self, data, crc):
         correct_crc = zlib.crc32(data)
         crc_code = struct.unpack(">I", crc)[0]
         return crc_code == correct_crc
+
+
+def paeth(a, b, c):
+    p = a + b - c
+    pa = abs(p - a)
+    pb = abs(p - b)
+    pc = abs(p - c)
+    if pa <= pb and pa <= pc:
+        return a
+    elif pb <= pc:
+        return b
+    else:
+        return c
