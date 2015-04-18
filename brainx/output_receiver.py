@@ -3,6 +3,7 @@ __author__ = 'Daniel Maly'
 import sys
 import glob
 
+
 class OutputReceiver:
     def __init__(self):
         self.output = []

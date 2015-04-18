@@ -61,54 +61,63 @@ class InputSource:
     def get_debug_data(self):
         return "# program data\n" + self.program + "\n\n", ""
 
+    def write_to_file(self, filename):
+        with open(filename, 'w') as file:
+            file.write(self.program)
+            file.write('\n')
 
-class BrainlollerInputSource(InputSource):
-    def __init__(self, decoder, debug=False):
-        color_map = {
-            b'\xff\x00\x00': '>',
-            b'\x80\x00\x00': '<',
-            b'\x00\xff\x00': '+',
-            b'\x00\x80\x00': '-',
-            b'\x00\x00\xff': '.',
-            b'\x00\x00\x80': ',',
-            b'\xff\xff\x00': '[',
-            b'\x80\x80\x00': ']',
-            }
+    def write_to_stdout(self):
+        print(self.program)
 
-        ROTATE_LEFT = b'\x00\x80\x80'
-        ROTATE_RIGHT = b'\x00\xff\xff'
 
-        pointer_ops = {
+#Base class for PNG sources
+class PNGInputSource(InputSource):
+    color_map = {
+        b'\xff\x00\x00': '>',
+        b'\x80\x00\x00': '<',
+        b'\x00\xff\x00': '+',
+        b'\x00\x80\x00': '-',
+        b'\x00\x00\xff': '.',
+        b'\x00\x00\x80': ',',
+        b'\xff\xff\x00': '[',
+        b'\x80\x80\x00': ']',
+        }
+
+    ROTATE_LEFT = b'\x00\x80\x80'
+    ROTATE_RIGHT = b'\x00\xff\xff'
+
+    pointer_ops = {
             0: (lambda x, y: (x+1, y)),  # Right
             1: (lambda x, y: (x, y+1)),  # Down
             2: (lambda x, y: (x-1, y)),  # Left
             3: (lambda x, y: (x, y-1))   # Up
         }
 
+    def __init__(self, pixels, width, height, debug=False):
+        self.pixels = pixels
         program = ""
         pointer_dir = 0
         pointer = (0, 0)
-        while pointer[0] in range(decoder.width) and pointer[1] in range(decoder.height):
+        while pointer[0] in range(width) and pointer[1] in range(height):
             op = None
-            pix = decoder.pixels[pointer[1]][pointer[0]]
-            if pix in color_map:
-                program += color_map[pix]
+            pix = pixels[pointer[1]][pointer[0]]
+            if pix in self.color_map:
+                program += self.color_map[pix]
                 # print("Read pix {} translated to {}".format(pix, color_map[pix]))
-            elif pix == ROTATE_LEFT:
+            elif pix == self.ROTATE_LEFT:
                 pointer_dir -= 1
-            elif pix == ROTATE_RIGHT:
+            elif pix == self.ROTATE_RIGHT:
                 pointer_dir += 1
             pointer_dir %= 4
-            pointer = (pointer_ops[pointer_dir])(pointer[0], pointer[1])
+            pointer = (self.pointer_ops[pointer_dir])(pointer[0], pointer[1])
 
-        self.decoder = decoder
         super().__init__(program, [], debug)
 
     def get_debug_data(self):
         dd = super().get_debug_data()
         rgbinput = "# RGB input\n[\n"
 
-        for row in self.decoder.pixels:
+        for row in self.pixels:
             rgbinput += "    ["
             for pix in row:
                 rgbinput += "({}, {}, {}), ".format(int(pix[0]), int(pix[1]), int(pix[2]))
@@ -117,3 +126,25 @@ class BrainlollerInputSource(InputSource):
 
         rgbinput += "]\n\n"
         return dd[0], rgbinput
+
+
+class BrainlollerInputSource(PNGInputSource):
+    def __init__(self, decoder, debug=False):
+        super().__init__(decoder.pixels,
+                         debug=debug,
+                         width=decoder.width,
+                         height=decoder.height)
+
+
+class BraincopterInputSource(PNGInputSource):
+    def __init__(self, decoder, debug=False):
+        convert_func = lambda r, g, b: (-2 * r, 3 * g, )
+        pixels = []
+        for row in decoder.pixels:
+            nrow = []
+            for pix in row:
+                nrow.append([])
+        super().__init__(pixels,
+                         debug=debug,
+                         width=decoder.width,
+                         height=decoder.height)
