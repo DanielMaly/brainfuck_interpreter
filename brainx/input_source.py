@@ -101,4 +101,19 @@ class BrainlollerInputSource(InputSource):
             pointer_dir %= 4
             pointer = (pointer_ops[pointer_dir])(pointer[0], pointer[1])
 
+        self.decoder = decoder
         super().__init__(program, [], debug)
+
+    def get_debug_data(self):
+        dd = super().get_debug_data()
+        rgbinput = "# RGB input\n[\n"
+
+        for row in self.decoder.pixels:
+            rgbinput += "    ["
+            for pix in row:
+                rgbinput += "({}, {}, {}), ".format(int(pix[0]), int(pix[1]), int(pix[2]))
+            rgbinput = rgbinput[:-2]
+            rgbinput += "],\n"
+
+        rgbinput += "]\n\n"
+        return dd[0], rgbinput
