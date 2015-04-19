@@ -47,13 +47,9 @@ class Binterpreter:
         if instruction is None:
             self.terminate()
 
-        if self.step_count > 2000000:
-            print("Binterpreter terminating because maximum number of steps was reached")
-            self.terminate()
-
         self.step_count += 1
 
-        if self.print_steps:
+        if self.print_steps and self.step_count % 10000 == 0:
             print("S " + str(self.step_count) + " ## I " + str(self.instruction_log_pointer) + " ## MP " + str(self.pointer) + " ## MV " +
               str(self.memory[self.pointer]) + " ## X " + str(instruction))
 

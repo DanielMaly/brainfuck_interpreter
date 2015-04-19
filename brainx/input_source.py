@@ -3,9 +3,12 @@ __author__ = 'Daniel Maly'
 import re
 import sys
 import png_decoder
+import util
 
 
 class InputSource:
+
+    VALID_CHARACTERS = ['<', '>', '.', ',', '+', '-', '[', ']']
 
     @classmethod
     def for_file(cls, filename, debug=False):
@@ -18,7 +21,10 @@ class InputSource:
     def for_image_file(cls, filename, debug=False):
         decoder = png_decoder.PNGDecoder(filename)
         decoder.decode()
-        return BrainlollerInputSource(decoder, debug)
+        if decoder.is_brainloller():
+            return BrainlollerInputSource(decoder, debug)
+        else:
+            return BraincopterInputSource(decoder, debug)
 
     @classmethod
     def for_input_string(cls, string, debug=False):
@@ -53,7 +59,10 @@ class InputSource:
 
     def get_next_input(self):
         if self.input_pointer >= len(self.input):
-            return ord(sys.stdin.read(1))
+            print("Waiting for input now")
+            r = ord(sys.stdin.read(1))
+            return r
+
         ret = self.input[self.input_pointer]
         self.input_pointer += 1
         return ord(ret)
@@ -63,8 +72,9 @@ class InputSource:
 
     def write_to_file(self, filename):
         with open(filename, 'w') as file:
-            file.write(self.program)
-            file.write('\n')
+            for i in range(0, len(self.program), 72):
+                file.write(self.program[i:i+72])
+                file.write('\n')
 
     def write_to_stdout(self):
         print(self.program)
@@ -72,19 +82,6 @@ class InputSource:
 
 #Base class for PNG sources
 class PNGInputSource(InputSource):
-    color_map = {
-        b'\xff\x00\x00': '>',
-        b'\x80\x00\x00': '<',
-        b'\x00\xff\x00': '+',
-        b'\x00\x80\x00': '-',
-        b'\x00\x00\xff': '.',
-        b'\x00\x00\x80': ',',
-        b'\xff\xff\x00': '[',
-        b'\x80\x80\x00': ']',
-        }
-
-    ROTATE_LEFT = b'\x00\x80\x80'
-    ROTATE_RIGHT = b'\x00\xff\xff'
 
     pointer_ops = {
             0: (lambda x, y: (x+1, y)),  # Right
@@ -93,24 +90,30 @@ class PNGInputSource(InputSource):
             3: (lambda x, y: (x, y-1))   # Up
         }
 
+    CMD_ROTATE_LEFT = 'L'
+    CMD_ROTATE_RIGHT = 'R'
+
     def __init__(self, pixels, width, height, debug=False):
         self.pixels = pixels
         program = ""
         pointer_dir = 0
         pointer = (0, 0)
+
+        instructions = []
         while pointer[0] in range(width) and pointer[1] in range(height):
             op = None
             pix = pixels[pointer[1]][pointer[0]]
-            if pix in self.color_map:
-                program += self.color_map[pix]
-                # print("Read pix {} translated to {}".format(pix, color_map[pix]))
-            elif pix == self.ROTATE_LEFT:
+            cmd = self.get_command(pix)
+            if cmd in self.VALID_CHARACTERS:
+                instructions.append(cmd)
+            elif cmd == self.CMD_ROTATE_LEFT:
                 pointer_dir -= 1
-            elif pix == self.ROTATE_RIGHT:
+            elif cmd == self.CMD_ROTATE_RIGHT:
                 pointer_dir += 1
             pointer_dir %= 4
             pointer = (self.pointer_ops[pointer_dir])(pointer[0], pointer[1])
 
+        program = ''.join([x for x in instructions])
         super().__init__(program, [], debug)
 
     def get_debug_data(self):
@@ -127,24 +130,37 @@ class PNGInputSource(InputSource):
         rgbinput += "]\n\n"
         return dd[0], rgbinput
 
+    def get_command(self, pixel):
+        return ''
+
 
 class BrainlollerInputSource(PNGInputSource):
+    color_map = util.brainloller_color_map
+
     def __init__(self, decoder, debug=False):
         super().__init__(decoder.pixels,
                          debug=debug,
                          width=decoder.width,
                          height=decoder.height)
 
+    def get_command(self, pixel):
+        if pixel in self.color_map:
+            return self.color_map[pixel]
+        return None
+
 
 class BraincopterInputSource(PNGInputSource):
+    command_map = util.braincopter_command_map
+
     def __init__(self, decoder, debug=False):
-        convert_func = lambda r, g, b: (-2 * r, 3 * g, )
-        pixels = []
-        for row in decoder.pixels:
-            nrow = []
-            for pix in row:
-                nrow.append([])
-        super().__init__(pixels,
+        super().__init__(decoder.pixels,
                          debug=debug,
                          width=decoder.width,
                          height=decoder.height)
+
+    def get_command(self, pixel):
+        val = (-2 * pixel[0] + 3 * pixel[1] + pixel[2]) % 11
+        if val in self.command_map:
+            cmd = self.command_map[val]
+            return cmd
+        return None

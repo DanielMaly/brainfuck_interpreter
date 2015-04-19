@@ -15,6 +15,7 @@ class OutputReceiver:
         self.output.append(char)
         if self.print_to_stdout:
             sys.stdout.write(chr(char))
+            sys.stdout.flush()
 
     def output_bytes(self):
         return bytes(self.output)

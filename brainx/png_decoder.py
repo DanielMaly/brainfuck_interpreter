@@ -2,6 +2,8 @@ __author__ = 'Daniel Maly'
 
 import zlib
 import struct
+import util
+
 
 class PNGWrongHeaderError(BaseException):
     pass
@@ -70,14 +72,13 @@ class PNGDecoder:
         if not self.crc_chunk(h[4:] + data, crc):
             raise CRCError()
 
-        uncompressed = zlib.decompress(data)
-
-        self.chunks.extend(uncompressed)
+        self.chunks.extend(data)
 
         return self.MORE_CHUNKS
 
     def process_chunks(self):
-        self.pixels = self.unfilter(self.chunks, self.width)
+        uncompressed = zlib.decompress(self.chunks)
+        self.pixels = self.unfilter(uncompressed, self.width)
 
     def unfilter(self, data, width):
         filter_funcs = {
@@ -85,13 +86,14 @@ class PNGDecoder:
             1: (lambda x, a, b, c: x + a),
             2: (lambda x, a, b, c: x + b),
             3: (lambda x, a, b, c: (a + b) // 2),
-            4: (lambda x, a, b, c: x + paeth(a, b, c))
+            4: (lambda x, a, b, c: x + util.paeth(a, b, c))
         }
 
         unfilt = []
         step = 3*width + 1
         prev_row_index = -1
         for i in range(0, len(data), step):
+            print("i is {} / {}".format(i, len(data)))
             previous_row = None
             if prev_row_index >= 0:
                 previous_row = unfilt[prev_row_index]
@@ -132,15 +134,9 @@ class PNGDecoder:
         crc_code = struct.unpack(">I", crc)[0]
         return crc_code == correct_crc
 
-
-def paeth(a, b, c):
-    p = a + b - c
-    pa = abs(p - a)
-    pb = abs(p - b)
-    pc = abs(p - c)
-    if pa <= pb and pa <= pc:
-        return a
-    elif pb <= pc:
-        return b
-    else:
-        return c
+    def is_brainloller(self):
+        flattened = [pix for row in self.pixels for pix in row]
+        for pix in flattened:
+            if pix not in util.brainloller_color_map:
+                return False
+        return True
