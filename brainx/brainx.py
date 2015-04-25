@@ -22,6 +22,8 @@ def main():
     parser.add_argument("-p", "--pointer", help="initial pointer location", metavar='N', type=int, default=0)
     parser.add_argument("--lc2f", help="translate input image to regular brainfuck source",
                         metavar=('source_image', 'destination_file'), nargs='+')
+    parser.add_argument("--f2lc", help="translate input program to a brainloller / braincopter image",
+                        metavar=('source_file', ''), nargs='+')
 
     args = parser.parse_args()
     dispatch(args)
