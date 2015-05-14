@@ -1,3 +1,8 @@
+import zlib
+import util
+import struct
+from png_decoder import PNGDecoder
+
 __author__ = 'Daniel Maly'
 
 # Common PNG writer with pixels already ready
@@ -13,7 +18,56 @@ __author__ = 'Daniel Maly'
 
 
 class PNGWriter:
-    pass
+    def __init__(self, filename, pixels):
+        self.filename = filename
+        self.pixels = pixels
+
+    def encode(self):
+        header_bytes = PNGDecoder.PNG_HEADER
+        special_bytes = PNGDecoder.SPECIAL_FIELDS
+        width = len(self.pixels[0])
+        width_bytes = struct.pack(">I", width)
+        height_bytes = struct.pack(">I", len(self.pixels))
+
+        with open(self.filename, 'wb') as file:
+            file.write(header_bytes)
+            header_chunk = self.make_chunk("IHDR", width_bytes + height_bytes + special_bytes)
+            file.write(header_chunk)
+
+            # encode scanlines
+            scanlines = bytearray()
+            prev_row = ['\x00' for i in range(width)]
+            for row in self.pixels:
+                scanline = self.encode_scanline(row, prev_row)
+                prev_row = row
+                scanlines.extend(scanline)
+
+            # compress
+            data = zlib.compress(scanlines)
+
+            # write IDAT
+            CHUNK_SIZE = 1024
+            for i in range(len(data) // CHUNK_SIZE + 1):
+                chunk_data = data[i*CHUNK_SIZE:(i+1)*CHUNK_SIZE]
+                chunk = self.make_chunk("IDAT", chunk_data)
+                file.write(chunk)
+
+            # write IEND
+            end_chunk = self.make_chunk("IEND", b'')
+            file.write(end_chunk)
+
+    @staticmethod
+    def make_chunk(name, data):
+        length_bytes = struct.pack(">I", len(data))
+        chunk_name = name.encode("ascii")
+        crc = struct.pack(">I", zlib.crc32(chunk_name + data))
+        chunk = length_bytes + chunk_name + data + crc
+        return chunk
+
+    @staticmethod
+    def encode_scanline(row, prev_row):
+        # Don't use any filters
+        return b'\x00' + bytes([bts for pix in row for bts in pix])
 
 
 class GridMaker:
@@ -22,9 +76,9 @@ class GridMaker:
         self.width = width
         self.height = height
 
-    # This will return a grid of BRAINFUCK commands. Nop is represented by #.
+    # This will return a grid of BRAINFUCK commands. Nop is represented by 'N'.
     # Turns are represented by R,L
-    # The grid is constructed from the top left
+    # The grid is constructed from the top left in rows
     def make_grid(self):
 
         program = self.program
@@ -44,7 +98,7 @@ class GridMaker:
                         assembled_row.insert(1, program[0])
                     program = program[1:]
                 else:
-                    assembled_row.append('#')
+                    assembled_row.append('N')
             grid.append(assembled_row)
 
         return grid
@@ -61,11 +115,12 @@ class BrainlollerEncoder:
 
         # Then we make the command grid (common part with braincopter)
         grid = GridMaker(self.program, width, height).make_grid()
-        print(grid)
 
         # Then we convert the grid into pixels
+        pixels = self.pixelize(grid)
+
         # Then we pass it to the PNG writer (common part with braincopter)
-        pass
+        PNGWriter(self.filename, pixels).encode()
 
     def optimal_width_and_height(self):
         length = len(self.program)
@@ -80,3 +135,9 @@ class BrainlollerEncoder:
 
         print("Computed optimal width and height: {},{}".format(width, height))
         return width, height
+
+    @classmethod
+    def pixelize(cls, grid):
+        inv_colors = {v: k for k, v in util.brainloller_color_map.items()}
+        inv_colors['N'] = b'\x00\x00\x00'
+        return [[inv_colors[command] for command in row] for row in grid]
