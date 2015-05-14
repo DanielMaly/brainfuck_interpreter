@@ -8,12 +8,23 @@ class Binterpreter:
         self.terminated = False
         self.inp = input_source
         self.output = output_receiver
-        self.instruction_log = []
-        self.instruction_log_pointer = 0
+        self.program = input_source.program
+        self.program_pointer = 0
         self.step_count = 0
         self.print_steps = False
+        self.loop_stack = []
 
-        # print("Binterpreter constructed with program {}".format(input_source.program))
+        self.options = {
+            '#': self.print_debug_info,
+            '<': self.move_left,
+            '>': self.move_right,
+            '.': self.out,
+            ',': self.read,
+            '+': self.increment,
+            '-': self.decrement,
+            '[': self.open_loop,
+            ']': self.close_loop
+        }
 
     def initialize_memory(self, memory):
         self.memory = bytearray(memory)
@@ -33,43 +44,29 @@ class Binterpreter:
         self.output.print_debug_data(input_debug_data, self)
 
     def move_next_instruction(self):
-        if self.instruction_log_pointer >= len(self.instruction_log):
-            self.instruction_log.append(self.inp.get_next_instruction())
-        ret = self.instruction_log[self.instruction_log_pointer]
-        self.instruction_log_pointer += 1
-        return ret
+        if self.program_pointer >= len(self.program):
+            self.terminate()
+            return 'N'
+        self.program_pointer += 1
+        return self.program[self.program_pointer-1]
 
     def move_previous_instruction(self):
-        ret = self.instruction_log[self.instruction_log_pointer - 1]
-        self.instruction_log_pointer -= 1
+        self.program_pointer -= 1
+        ret = self.program[self.program_pointer]
         return ret
 
     def step(self):
         instruction = self.move_next_instruction()
-        if instruction is None:
-            self.terminate()
 
         self.step_count += 1
 
-        if self.print_steps and self.step_count % 10000 == 0:
-            print("S " + str(self.step_count) + " ## I " + str(self.instruction_log_pointer) + " ## MP " + str(self.pointer) + " ## MV " +
+        if self.print_steps:
+            print("S " + str(self.step_count) + " ## I " + str(self.program_pointer) + " ## MP " + str(self.pointer) + " ## MV " +
               str(self.memory[self.pointer]) + " ## X " + str(instruction))
 
-        options = {
-            '#': self.print_debug_info,
-            '<': self.move_left,
-            '>': self.move_right,
-            '.': self.out,
-            ',': self.read,
-            '+': self.increment,
-            '-': self.decrement,
-            '[': self.open_loop,
-            ']': self.close_loop
-        }
 
-        if instruction in options:
-            func = options[instruction]
-            func()
+        if instruction in self.options:
+            self.options[instruction]()
 
     def move_left(self):
         if self.pointer != 0:
@@ -81,10 +78,8 @@ class Binterpreter:
             self.memory.append(0x00)
 
     def increment(self):
-        if self.memory[self.pointer] == 0xFF:
-            self.memory[self.pointer] = 0x00
-        else:
-            self.memory[self.pointer] += 1
+        temp = self.memory[self.pointer] + 1
+        self.memory[self.pointer] = temp % 256
 
     def decrement(self):
         if self.memory[self.pointer] == 0x00:
@@ -109,8 +104,17 @@ class Binterpreter:
                 elif instr == '[':
                     closed_loops_count += 1
 
+        else:
+            self.loop_stack.append(self.program_pointer)
+
     def close_loop(self):
         if self.memory[self.pointer] != 0x00:
+
+            if len(self.loop_stack) > 0:
+                open_loop_index = self.loop_stack[-1]
+                self.program_pointer = open_loop_index
+                return
+
             opened_loops_count = 1
             self.move_previous_instruction()
             while opened_loops_count > 0:
@@ -120,3 +124,6 @@ class Binterpreter:
                 elif instr == ']':
                     opened_loops_count += 1
             self.move_next_instruction()
+
+        else:
+            self.loop_stack.pop()

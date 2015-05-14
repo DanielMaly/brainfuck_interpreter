@@ -6,14 +6,6 @@ from png_decoder import PNGDecoder
 
 __author__ = 'Daniel Maly'
 
-# Common PNG writer with pixels already ready
-
-# Grid generator for given width, height and program
-
-# Pixel generator for brainloller given a grid
-
-# Pixel generator for braincopter given the source image and the grid
-
 # Brainloller encoder: Program -> optimal width and height -> grid -> pixels -> write PNG
 # Braincopter encoder: Program, source image -> grid -> source image + grid -> pixels -> write PNG
 
@@ -176,7 +168,6 @@ class BraincopterEncoder:
     # Original implementation by Lode Vandevenne, ported from C++ code
     @staticmethod
     def closest_color(pixel, command):
-        # print("I need to encode command {} into pixel {}".format(command, pixel))
         inv_numbers = {v: k for k, v in util.braincopter_command_map.items()}
         inv_numbers['N'] = 10
         NUMCOMMANDS = len(inv_numbers) - 1
@@ -203,8 +194,6 @@ class BraincopterEncoder:
             pix_code % 256
         ]
 
-        # print("Calculated pixel ({},{},{}) corresponding to command {}".format(pix[0], pix[1], pix[2],
-        #                                                                      BraincopterInputSource.get_command(pix)))
         return pix
 
 

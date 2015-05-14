@@ -43,19 +43,8 @@ class InputSource:
     def __init__(self, program, inp, debug=False):
         self.program = program
         self.input = inp
-        self.program_pointer = 0
         self.input_pointer = 0
         self.debug = debug
-
-    def get_next_instruction(self):
-        if self.program_pointer >= len(self.program):
-            if self.program_pointer == len(self.program) and self.debug:
-                self.program_pointer += 1
-                return "#"
-            return None
-        ret = self.program[self.program_pointer]
-        self.program_pointer += 1
-        return ret
 
     def get_next_input(self):
         if self.input_pointer >= len(self.input):
