@@ -136,8 +136,42 @@ class BrainlollerEncoder:
         print("Computed optimal width and height: {},{}".format(width, height))
         return width, height
 
-    @classmethod
-    def pixelize(cls, grid):
+    @staticmethod
+    def pixelize(grid):
         inv_colors = {v: k for k, v in util.brainloller_color_map.items()}
         inv_colors['N'] = b'\x00\x00\x00'
         return [[inv_colors[command] for command in row] for row in grid]
+
+
+class BraincopterEncoder:
+    def __init__(self, program, source, destination):
+        self.program = program
+        self.source = source
+        self.destination = destination
+
+    def encode(self):
+        decoder = PNGDecoder(self.source)
+        decoder.decode()
+        width, height = decoder.width, decoder.height
+        pixels = decoder.pixels
+
+        grid = GridMaker(self.program, width, height).make_grid()
+        encoded = self.pixelize(pixels, grid)
+
+        PNGWriter(self.destination, encoded).encode()
+
+    @classmethod
+    def pixelize(cls, source, grid):
+        rows = []
+        for i in range(len(grid)):
+            source_row = source[i]
+            enc_row = []
+            for j in range(len(source_row)):
+                enc_row.append(cls.closest_color(source_row[j], grid[i][j]))
+            rows.append(enc_row)
+
+        return rows
+
+    @staticmethod
+    def closest_color(pixel, command):
+        inv_numbers = {v: k for k, v in util.braincopter_command_map.items()}
