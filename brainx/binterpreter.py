@@ -13,6 +13,8 @@ class Binterpreter:
         self.step_count = 0
         self.print_steps = False
 
+        # print("Binterpreter constructed with program {}".format(input_source.program))
+
     def initialize_memory(self, memory):
         self.memory = bytearray(memory)
 

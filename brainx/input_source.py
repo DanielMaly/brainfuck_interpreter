@@ -59,7 +59,7 @@ class InputSource:
 
     def get_next_input(self):
         if self.input_pointer >= len(self.input):
-            print("Waiting for input now")
+            # print("Waiting for input now")
             r = ord(sys.stdin.read(1))
             return r
 
@@ -158,9 +158,10 @@ class BraincopterInputSource(PNGInputSource):
                          width=decoder.width,
                          height=decoder.height)
 
-    def get_command(self, pixel):
+    @classmethod
+    def get_command(cls, pixel):
         val = (-2 * pixel[0] + 3 * pixel[1] + pixel[2]) % 11
-        if val in self.command_map:
-            cmd = self.command_map[val]
+        if val in cls.command_map:
+            cmd = cls.command_map[val]
             return cmd
         return None

@@ -85,7 +85,7 @@ class PNGDecoder:
             0: (lambda x, a, b, c: x),
             1: (lambda x, a, b, c: x + a),
             2: (lambda x, a, b, c: x + b),
-            3: (lambda x, a, b, c: (a + b) // 2),
+            3: (lambda x, a, b, c: x + (a + b) // 2),
             4: (lambda x, a, b, c: x + util.paeth(a, b, c))
         }
 
@@ -93,7 +93,7 @@ class PNGDecoder:
         step = 3*width + 1
         prev_row_index = -1
         for i in range(0, len(data), step):
-            print("i is {} / {}".format(i, len(data)))
+            # print("i is {} / {}".format(i, len(data)))
             previous_row = None
             if prev_row_index >= 0:
                 previous_row = unfilt[prev_row_index]

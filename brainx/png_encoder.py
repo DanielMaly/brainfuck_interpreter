@@ -1,4 +1,5 @@
 import zlib
+from input_source import BraincopterInputSource
 import util
 import struct
 from png_decoder import PNGDecoder
@@ -133,7 +134,7 @@ class BrainlollerEncoder:
             else:
                 width += 1
 
-        print("Computed optimal width and height: {},{}".format(width, height))
+        # print("Computed optimal width and height: {},{}".format(width, height))
         return width, height
 
     @staticmethod
@@ -172,6 +173,43 @@ class BraincopterEncoder:
 
         return rows
 
+    # Original implementation by Lode Vandevenne, ported from C++ code
     @staticmethod
     def closest_color(pixel, command):
+        # print("I need to encode command {} into pixel {}".format(command, pixel))
         inv_numbers = {v: k for k, v in util.braincopter_command_map.items()}
+        inv_numbers['N'] = 10
+        NUMCOMMANDS = len(inv_numbers) - 1
+
+        command = inv_numbers[command]
+        r, g, b = pixel[0], pixel[1], pixel[2]
+
+        pix_code = 65536 * r + 256 * g + b
+        pix_code //= NUMCOMMANDS
+        pix_code *= NUMCOMMANDS
+        pix_code += command
+
+        alt = [pix_code, pix_code + NUMCOMMANDS, pix_code - NUMCOMMANDS]
+        if alt[2] < 0:
+            alt[2] = alt[0]
+        if alt[1] >= 16777216:
+            alt[1] = alt[0]
+
+        pix_code = min(alt, key=lambda x: abs((r+g+b) // 3 - av_int_rgb(x)))
+
+        pix = [
+            (pix_code // 65536) % 256,
+            (pix_code // 256) % 256,
+            pix_code % 256
+        ]
+
+        # print("Calculated pixel ({},{},{}) corresponding to command {}".format(pix[0], pix[1], pix[2],
+        #                                                                      BraincopterInputSource.get_command(pix)))
+        return pix
+
+
+def av_int_rgb(color):
+    R = (color // 65536) % 256
+    G = (color // 256) % 256
+    B = color % 256
+    return (R + G + B) // 3
