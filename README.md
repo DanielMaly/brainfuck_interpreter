@@ -7,11 +7,11 @@ Copyright (c) 2015 Daniel Malý
 
 Rozhraní z příkazové řádky je implementováno tak, jak je uvedeno v požadavcích. Jedinou výjimkou je podpora formátu P6.
 Kvůli nejednoznačnosti zadání je implementována takto: 
-    * Funguje pouze přepínač --pnm. PBM jako monochromatický formát je nám k ničemu.
-    * Přepínač --pnm lze kombinovat pouze s variantou --f2lc.
-    * Jeho zapnutí nahradí formát PNG formátem P6 pro výstup.
-    * Přepínač --f2lc podporuje i obrazový vstup, lze tedy překládat z PNG do P6, ovšem pouze na úrovni obsaženého
-      Brainfuck kódu (ostatní informace na vstupu jsou ztraceny).
+    *   Funguje pouze přepínač --pnm. PBM jako monochromatický formát je nám k ničemu.
+    *   Přepínač --pnm lze kombinovat pouze s variantou --f2lc.
+    *   Jeho zapnutí nahradí formát PNG formátem P6 pro výstup.
+    *   Přepínač --f2lc podporuje i obrazový vstup, lze tedy překládat z PNG do P6, ovšem pouze na úrovni obsaženého
+        Brainfuck kódu (ostatní informace na vstupu jsou ztraceny).
       
 Parsování argumentů z příkazové řádky je uděláno pomocí modulu argparse, který je kvůli nestandardním požadavkům
 trochu znásilněn. Nebylo v mých silách kontrolovat všechny možné nesmyslné kombinace parametrů, které argparsem nešlo
