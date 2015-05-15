@@ -63,6 +63,23 @@ class PNGWriter:
         return b'\x00' + bytes([bts for pix in row for bts in pix])
 
 
+class PPMWriter:
+    def __init__(self, filename, pixels):
+        self.filename = filename
+        self.pixels = pixels
+
+    def encode(self):
+        with open(self.filename, 'wb') as file:
+            file.write("P6\n".encode("ascii"))
+            w, h = str(len(self.pixels[0])), str(len(self.pixels))
+            file.write((w + " " + h + "\n").encode("ascii"))
+            file.write("255\n".encode("ascii"))
+
+            for row in self.pixels:
+                for column in row:
+                    file.write(column)
+
+
 class GridMaker:
     def __init__(self, program, width, height):
         self.program = program
@@ -98,9 +115,10 @@ class GridMaker:
 
 
 class BrainlollerEncoder:
-    def __init__(self, program, filename):
+    def __init__(self, program, filename, format='png'):
         self.program = program
         self.filename = filename
+        self.format = format
 
     def encode(self):
         # First we get the optimal width and height
@@ -113,7 +131,10 @@ class BrainlollerEncoder:
         pixels = self.pixelize(grid)
 
         # Then we pass it to the PNG writer (common part with braincopter)
-        PNGWriter(self.filename, pixels).encode()
+        if self.format == 'png':
+            PNGWriter(self.filename, pixels).encode()
+        else:
+            PPMWriter(self.filename, pixels).encode()
 
     def optimal_width_and_height(self):
         length = len(self.program)
@@ -137,10 +158,11 @@ class BrainlollerEncoder:
 
 
 class BraincopterEncoder:
-    def __init__(self, program, source, destination):
+    def __init__(self, program, source, destination, format='png'):
         self.program = program
         self.source = source
         self.destination = destination
+        self.format = format
 
     def encode(self):
         decoder = PNGDecoder(self.source)
@@ -151,7 +173,10 @@ class BraincopterEncoder:
         grid = GridMaker(self.program, width, height).make_grid()
         encoded = self.pixelize(pixels, grid)
 
-        PNGWriter(self.destination, encoded).encode()
+        if self.format == 'png':
+            PNGWriter(self.destination, encoded).encode()
+        else:
+            PPMWriter(self.destination, encoded).encode()
 
     @classmethod
     def pixelize(cls, source, grid):
