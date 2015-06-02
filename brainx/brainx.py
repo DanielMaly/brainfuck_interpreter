@@ -75,12 +75,12 @@ def dispatch(args):
 
     else:
         output = OutputReceiver()
-        start_interpreter(source, output, args.memory, args.pointer, args.steps)
+        start_interpreter(source, output, args.memory, args.pointer, args.steps, args.test)
 
 
 
-def start_interpreter(source, output, memory, pointer, steps):
-    binterpreter = Binterpreter(input_source=source, output_receiver=output)
+def start_interpreter(source, output, memory, pointer, steps, test=False):
+    binterpreter = Binterpreter(input_source=source, output_receiver=output, test=test)
     if memory is not None and len(memory) > 0:
         binterpreter.initialize_memory(memory_bytes_from_string(memory))
     binterpreter.initialize_pointer(pointer)
@@ -100,7 +100,7 @@ def memory_bytes_from_string(st):
 def retrieve_source(source, debug=False):
     if source is not None:
         if set(source).issubset(set("[]-+<>#.,")):
-            return InputSource.for_input_string(source[1:-1], debug=debug)
+            return InputSource.for_input_string(source, debug=debug)
         else:
             try:
                 return InputSource.for_file(source, debug=debug)

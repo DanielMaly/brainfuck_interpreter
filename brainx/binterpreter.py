@@ -2,7 +2,7 @@ __author__ = 'Daniel Maly'
 
 
 class Binterpreter:
-    def __init__(self, input_source, output_receiver):
+    def __init__(self, input_source, output_receiver, test=False):
         self.memory = bytearray.fromhex('00')
         self.pointer = 0
         self.terminated = False
@@ -13,6 +13,7 @@ class Binterpreter:
         self.step_count = 0
         self.print_steps = False
         self.loop_stack = []
+        self.test = test
 
         self.options = {
             '#': self.print_debug_info,
@@ -45,6 +46,8 @@ class Binterpreter:
 
     def move_next_instruction(self):
         if self.program_pointer >= len(self.program):
+            if self.test:
+                self.print_debug_info()
             self.terminate()
             return 'N'
         self.program_pointer += 1
