@@ -93,13 +93,13 @@ def start_interpreter(source, output, memory, pointer, steps):
 
 def memory_bytes_from_string(st):
     #Unwrap b'...'
-    s = bytes(st[2:-1], "ascii").decode("unicode_escape")
+    s = bytes(st[1:], "ascii").decode("unicode_escape")
     return [ord(x) for x in s]
 
 
 def retrieve_source(source, debug=False):
     if source is not None:
-        if source[0] == '"' and source[-1] == '"':
+        if set(source).issubset(set("[]-+<>#.,")):
             return InputSource.for_input_string(source[1:-1], debug=debug)
         else:
             try:

@@ -1,0 +1,37 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0" is_locked="false">
+    <option name="myName" value="Project Default" />
+    <option name="myLocal" value="false" />
+    <inspection_tool class="PyPackageRequirementsInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredPackages">
+        <value>
+          <list size="23">
+            <item index="0" class="java.lang.String" itemvalue="D" />
+            <item index="1" class="java.lang.String" itemvalue="E" />
+            <item index="2" class="java.lang.String" itemvalue="F" />
+            <item index="3" class="java.lang.String" itemvalue="PNGWrongHeaderError" />
+            <item index="4" class="java.lang.String" itemvalue="G" />
+            <item index="5" class="java.lang.String" itemvalue="b" />
+            <item index="6" class="java.lang.String" itemvalue="A" />
+            <item index="7" class="java.lang.String" itemvalue="B" />
+            <item index="8" class="java.lang.String" itemvalue="C" />
+            <item index="9" class="java.lang.String" itemvalue="programming.xml" />
+            <item index="10" class="java.lang.String" itemvalue="overview.xml" />
+            <item index="11" class="java.lang.String" itemvalue="N" />
+            <item index="12" class="java.lang.String" itemvalue="verze" />
+            <item index="13" class="java.lang.String" itemvalue="pnm.xml" />
+            <item index="14" class="java.lang.String" itemvalue="KOMENT" />
+            <item index="15" class="java.lang.String" itemvalue="Pozn" />
+            <item index="16" class="java.lang.String" itemvalue="PNGNotImplementedError" />
+            <item index="17" class="java.lang.String" itemvalue="Sou" />
+            <item index="18" class="java.lang.String" itemvalue="P" />
+            <item index="19" class="java.lang.String" itemvalue="Specifikace" />
+            <item index="20" class="java.lang.String" itemvalue="brainx.py" />
+            <item index="21" class="java.lang.String" itemvalue="png.xml" />
+            <item index="22" class="java.lang.String" itemvalue="Z" />
+          </list>
+        </value>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>
