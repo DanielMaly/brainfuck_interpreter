@@ -93,11 +93,9 @@ def start_interpreter(source, output, memory, pointer, steps, test=False):
 
 def memory_bytes_from_string(st):
     #Unwrap b'...'
-    print("st was {}".format(st))
     if '\'' in st:
         st = st.replace('\'', '')
         st = st.replace('x', '\\x')
-        print("st is now {}".format(st))
     s = bytes(st[1:], "ascii").decode("unicode_escape")
     return [ord(x) for x in s]
 
